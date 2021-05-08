@@ -30,33 +30,34 @@ export class RMQRoutingKeyPublisher extends Tag {
   }
 
   async exec() {
-    this.context.once('app:stop', async () => {
-      await this.stop()
-    })
-    if (!this.slient && this.title) {
-      this.context.group(chalk.green(this.title))
-    }
-    await Promise.all(this.exchanges.map(async (exchange) => {
-      const { name, type, exchangeOpts, targets = [] } = exchange
-      await this.channel.assertExchange(name, type, exchangeOpts)
-      for (const target of targets) {
-        const data = (target.data === null || target.data === undefined) ? '' : typeof target.data === 'object' ? JSON.stringify(target.data) : target.data.toString()
-        try {
-          const isOk = this.channel.publish(name, target.routingKey, Buffer.from(data), target.publishOpts)
-          const msg = `Publish data to exchange "${name}"[${type}] with routingKey "${target.routingKey}"`
-          if (!isOk) throw new Error(msg)
-          if (!this.slient) {
-            this.context.group(chalk.gray(this.icon) + ' ' + chalk.green(msg))
-            this.context.log(chalk.yellow(data))
-            this.context.groupEnd()
-          }
-        } catch (err) {
-          this.context.log(chalk.red(err.message), data)
-        }
+    try {
+      if (!this.slient && this.title) {
+        this.context.group(chalk.green(this.title))
       }
-    }))
-    if (!this.slient && this.title) {
-      this.context.groupEnd()
+      await Promise.all(this.exchanges.map(async (exchange) => {
+        const { name, type, exchangeOpts, targets = [] } = exchange
+        await this.channel.assertExchange(name, type, exchangeOpts)
+        for (const target of targets) {
+          const data = (target.data === null || target.data === undefined) ? '' : typeof target.data === 'object' ? JSON.stringify(target.data) : target.data.toString()
+          try {
+            const isOk = this.channel.publish(name, target.routingKey, Buffer.from(data), target.publishOpts)
+            const msg = `Publish data to exchange "${name}"[${type}] with routingKey "${target.routingKey}"`
+            if (!isOk) throw new Error(msg)
+            if (!this.slient) {
+              this.context.group(chalk.gray(this.icon) + ' ' + chalk.green(msg))
+              this.context.log(chalk.yellow(data))
+              this.context.groupEnd()
+            }
+          } catch (err) {
+            this.context.log(chalk.red(err.message), data)
+          }
+        }
+      }))
+      if (!this.slient && this.title) {
+        this.context.groupEnd()
+      }
+    } finally {
+      await this.stop()
     }
   }
 
