@@ -69,6 +69,8 @@ export class RMQRoutingKeyPublisher extends Tag {
 export class RMQRoutingKeyConsumer extends Tag {
   private conn: Connection
   private channel: Channel
+  private resolve: any
+  private reject: any
 
   icon = '⇇'
   connection: string
@@ -101,43 +103,57 @@ export class RMQRoutingKeyConsumer extends Tag {
     this.context.once('app:stop', async () => {
       await this.stop()
     })
-    if (!this.slient && this.title) {
-      this.context.group(chalk.green(this.title))
-    }
-    await Promise.all(this.exchanges.map(async (exchange) => {
-      const { name, type, exchangeOpts, targets = [] } = exchange
-      await this.channel.assertExchange(name, type, exchangeOpts)
-      for (const target of targets) {
-        const q = await this.channel.assertQueue(target.queue, target.queueOpts)
-        this.channel.bindQueue(q.queue, name, target.routingKey)
-        if (target.prefetch) this.channel.prefetch(target.prefetch)
-        this.context.group(chalk.green(`Consuming exchange "${name}"[${type}] with routingKey "${target.routingKey}" in queue "${target.queue}"`))
-        if (target.handler) {
-          if (typeof target.handler === 'string') {
-            eval(`target.handler = ${target.handler}`)
-          }
+    return new Promise(async (resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+      try {
+        if (!this.slient && this.title) {
+          this.context.group(chalk.green(this.title))
         }
-        const handle = target.handler as any
-        await this.channel.consume(q.queue, async (msg: ConsumeMessage) => {
-          msg.content = msg.content?.toString() as any
-          if (!this.slient) this.context.log(chalk.gray(this.icon) + ' ' + chalk.yellow(JSON.stringify(msg)))
-          if (target.autoAck) this.channel.ack(msg)
-          if (handle) {
-            await handle(msg)
-            if (!target.autoAck) this.channel.ack(msg)
+        await Promise.all(this.exchanges.map(async (exchange) => {
+          const { name, type, exchangeOpts, targets = [] } = exchange
+          await this.channel.assertExchange(name, type, exchangeOpts)
+          for (const target of targets) {
+            const q = await this.channel.assertQueue(target.queue, target.queueOpts)
+            this.channel.bindQueue(q.queue, name, target.routingKey)
+            if (target.prefetch) this.channel.prefetch(target.prefetch)
+            this.context.group(chalk.green(`Consuming exchange "${name}"[${type}] with routingKey "${target.routingKey}" in queue "${target.queue}"`))
+            if (target.handler) {
+              if (typeof target.handler === 'string') {
+                eval(`target.handler = ${target.handler}`)
+              }
+            }
+            const handle = target.handler as any
+            await this.channel.consume(q.queue, async (msg: ConsumeMessage) => {
+              msg.content = msg.content?.toString() as any
+              if (!this.slient) this.context.log(chalk.gray(this.icon) + ' ' + chalk.yellow(JSON.stringify(msg)))
+              if (target.autoAck) this.channel.ack(msg)
+              if (handle) {
+                await handle(msg)
+                if (!target.autoAck) this.channel.ack(msg)
+              }
+            }, target.consumeOpts)
+            this.context.groupEnd()
           }
-        }, target.consumeOpts)
-        this.context.groupEnd()
+        }))
+      } catch (err) {
+        if (this.reject) {
+          this.reject(err)
+        }
+      } finally {
+        if (!this.slient && this.title) {
+          this.context.groupEnd()
+        }
       }
-    }))
-    if (!this.slient && this.title) {
-      this.context.groupEnd()
-    }
+    })
   }
 
   async stop() {
     await this.channel?.close()
     await this.conn?.close()
+    if (this.resolve) {
+      this.resolve(undefined)
+    }
   }
 
 }

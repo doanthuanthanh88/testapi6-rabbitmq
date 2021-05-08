@@ -29,17 +29,16 @@ yarn global add testapi6-rabbitmq
     exchanges:
       - name: thanh
         type: direct
-        exchangeOpts: 
+        exchangeOpts:
           durable: true
         targets:
-          queue: thanh-test-queue
-          routingKey: sayHello
-          consumeOpts:
-            exclusive: false
-          prefetch: 1
-          autoAck: true
-          queueOpts: 
-          consumeOpts:
+          - queue: thanh-test-queue
+            routingKey: sayHello
+            prefetch: 1
+            autoAck: true
+            queueOpts:
+            consumeOpts:
+              exclusive: false
 
 - RMQRoutingKeyPublisher:
     title: Test RoutingKey Publisher
@@ -47,13 +46,11 @@ yarn global add testapi6-rabbitmq
     exchanges:
       - name: thanh
         type: direct
-        exchangeOpts: 
+        exchangeOpts:
           durable: true
         targets:
-          routingKey: sayHello
-          data: { 
-            to: 'thanh' 
-          }
-          publishOpts:
+          - routingKey: sayHello
+            data: { to: "thanh" }
+            publishOpts:
 
 ```
