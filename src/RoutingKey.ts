@@ -80,6 +80,7 @@ export class RMQRoutingKeyConsumer extends Tag {
     type: string
     exchangeOpts?: Options.AssertExchange
     targets: {
+      pretty?: boolean
       prefetch?: number
       queue: string
       routingKey: string
@@ -124,10 +125,10 @@ export class RMQRoutingKeyConsumer extends Tag {
                 eval(`target.handler = ${target.handler}`)
               }
             }
-            const handle = target.handler as any
+            const handle: (msg: any) => any = target.handler as any
             await this.channel.consume(q.queue, async (msg: ConsumeMessage) => {
               msg.content = msg.content?.toString() as any
-              if (!this.slient) this.context.log(chalk.gray(this.icon) + ' ' + chalk.yellow(JSON.stringify(msg)))
+              if (!this.slient) this.context.log(chalk.gray(this.icon) + ' ' + chalk.yellow(target.pretty ? JSON.stringify(msg, null, '  ') : JSON.stringify(msg)))
               if (target.autoAck) this.channel.ack(msg)
               if (handle) {
                 await handle(msg)
