@@ -19,8 +19,8 @@ export class RMQRoutingKeyPublisher extends Tag {
     }[]
   }[]
 
-  constructor(attrs: RMQRoutingKeyPublisher) {
-    super(attrs)
+  init(attrs: RMQRoutingKeyPublisher) {
+    super.init(attrs)
     if (!this.exchanges) this.exchanges = []
   }
 
@@ -91,8 +91,8 @@ export class RMQRoutingKeyConsumer extends Tag {
     }[]
   }[]
 
-  constructor(attrs: RMQRoutingKeyConsumer) {
-    super(attrs)
+  init(attrs: RMQRoutingKeyConsumer) {
+    super.init(attrs)
     if (!this.exchanges) this.exchanges = []
   }
 
