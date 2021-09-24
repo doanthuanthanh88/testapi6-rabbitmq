@@ -1,4 +1,5 @@
-export { RMQRoutingKeyConsumer, RMQRoutingKeyPublisher } from "./RoutingKey"
+export { RMQRoutingKeyConsumer } from "./RMQRoutingKeyConsumer"
+export { RMQRoutingKeyPublisher } from "./RMQRoutingKeyPublisher"
 
 // import { RMQRoutingKeyConsumer } from "./RoutingKey"
 

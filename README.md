@@ -16,14 +16,16 @@ npm install -g testapi6-rabbitmq
 yarn global add testapi6-rabbitmq
 ```
 
-### Use in yaml
-```yaml
-- Require:
-    root: yarn
-    modules:
-      - testapi6-rabbitmq
+# Configuration
 
-- RMQRoutingKeyConsumer:
+Read [amqplib](https://www.npmjs.com/package/amqplib)
+
+### Use in yaml
+
+#### Consumer
+
+```yaml
+- testapi6-rabbitmq.RMQRoutingKeyConsumer:
     title: Test RoutingKey Consumer
     connection: amqp://user:password@localhost
     exchanges:
@@ -39,8 +41,12 @@ yarn global add testapi6-rabbitmq
             queueOpts:
             consumeOpts:
               exclusive: false
+```
 
-- RMQRoutingKeyPublisher:
+#### Publisher
+
+```yaml
+- testapi6-rabbitmq.RMQRoutingKeyPublisher:
     title: Test RoutingKey Publisher
     connection: amqp://user:password@localhost
     exchanges:
