@@ -75,8 +75,9 @@ export class RMQRoutingKeyPublisher extends Tag {
       if (!this.slient && this.title) {
         this.context.groupEnd()
       }
-    } finally {
+    } catch (err) {
       await this.stop()
+      throw err
     }
   }
 

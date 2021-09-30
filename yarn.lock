@@ -1245,9 +1245,9 @@ supports-color@^7.1.0:
     has-flag "^4.0.0"
 
 testapi6@^1.1.0:
-  version "1.2.69"
-  resolved "https://registry.yarnpkg.com/testapi6/-/testapi6-1.2.69.tgz#1a585f259ca7ada692468808302b4421927ff5eb"
-  integrity sha512-yoWzA1VrVj4P7IjQT9/kwRHM4Qn+cFgWiN/31lD1Dwlj7JvdBUojU+TzW84l+IL2lwB0X5u3gNoUIAdjiEmzGQ==
+  version "1.2.73"
+  resolved "https://registry.yarnpkg.com/testapi6/-/testapi6-1.2.73.tgz#35d7d7238be32d1a967a44539336d4d8b64d8ab2"
+  integrity sha512-Nz91Euq4HP7gujjoi+GEZXnhB0Utymj5GCNTweyaMTXYRsEQsCv2Jn9Kf2XgQNHP6eNrZTuf7APG0sjX8GJifA==
   dependencies:
     axios "^0.21.0"
     chai "^4.3.3"

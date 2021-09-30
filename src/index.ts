@@ -1,13 +1,17 @@
 export { RMQRoutingKeyConsumer } from "./RMQRoutingKeyConsumer"
 export { RMQRoutingKeyPublisher } from "./RMQRoutingKeyPublisher"
 
-// import { RMQRoutingKeyConsumer } from "./RoutingKey"
+// import { Testcase } from "testapi6/dist/components/Testcase"
+// import { RMQRoutingKeyConsumer } from "./RMQRoutingKeyConsumer"
+// import { RMQRoutingKeyPublisher } from "./RMQRoutingKeyPublisher"
 
 // async function main() {
-//   // setTimeout(async () => {
-//   const m = new RMQRoutingKeyConsumer({
+//   const tc = new Testcase('.')
+//   const m = new RMQRoutingKeyConsumer()
+//   m.init({
 //     title: 'Test consumer',
 //     connection: 'amqp://user:password@localhost',
+//     slient: true,
 //     exchanges: [{
 //       name: 'thanh',
 //       type: 'direct',
@@ -21,7 +25,12 @@ export { RMQRoutingKeyPublisher } from "./RMQRoutingKeyPublisher"
 //           consumeOpts: {
 //             exclusive: false
 //           },
-//           autoAck: true
+//           autoAck: true,
+//           steps: [
+//             {
+//               Echo: 'Ok'
+//             }
+//           ]
 //         }, {
 //           queue: 'thanh-test1-queue',
 //           routingKey: 'test1',
@@ -33,35 +42,42 @@ export { RMQRoutingKeyPublisher } from "./RMQRoutingKeyPublisher"
 //       ]
 //     }]
 //   } as RMQRoutingKeyConsumer)
+//   await m.setup(tc)
 //   m.prepare()
 //   await m.beforeExec()
-//   await m.exec()
+//   m.exec()
 //   console.log('done')
-//   // })
-//   // const m = new RMQRoutingKeyPublisher({
-//   //   title: 'Test publisher',
-//   //   connection: 'amqp://user:password@localhost',
-//   //   exchanges: [{
-//   //     name: 'thanh',
-//   //     type: 'direct',
-//   //     exchangeOpts: {
-//   //       durable: true
-//   //     },
-//   //     targets: [
-//   //       {
-//   //         routingKey: 'test',
-//   //         data: { age: 123 }
-//   //       },
-//   //       {
-//   //         routingKey: 'test1',
-//   //         data: { age: 123666 }
-//   //       }
-//   //     ]
-//   //   }]
-//   // } as RMQRoutingKeyPublisher)
-//   // m.prepare()
-//   // await m.beforeExec()
-//   // await m.exec()
+//   setTimeout(async () => {
+//     const m = new RMQRoutingKeyPublisher()
+//     m.init({
+//       title: 'Test publisher',
+//       slient: true,
+//       connection: 'amqp://user:password@localhost',
+//       exchanges: [{
+//         name: 'thanh',
+//         type: 'direct',
+//         exchangeOpts: {
+//           durable: true
+//         },
+//         targets: [
+//           {
+//             routingKey: 'test',
+//             data: { age: 123 }
+//           },
+//           {
+//             routingKey: 'test1',
+//             data: { age: 123666 }
+//           }
+//         ]
+//       }]
+//     } as RMQRoutingKeyPublisher)
+//     await m.setup(tc)
+//     m.prepare()
+//     await m.beforeExec()
+//     setInterval(async () => {
+//       await m.exec()
+//     }, 1000)
+//   }, 1000)
 // }
 
 // main()

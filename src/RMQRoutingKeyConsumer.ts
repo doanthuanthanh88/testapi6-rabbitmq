@@ -1,6 +1,8 @@
 import { Channel, connect, Connection, ConsumeMessage, Options } from 'amqplib'
 import chalk from 'chalk'
 import { Tag } from 'testapi6/dist/components/Tag'
+import { Components } from 'testapi6/dist/components/index'
+import { Group } from 'testapi6/dist/components/Group'
 
 export class RMQRoutingKeyConsumer extends Tag {
   static get des() {
@@ -20,10 +22,14 @@ export class RMQRoutingKeyConsumer extends Tag {
           - queue: thanh-test-queue
             routingKey: sayHello
             prefetch: 1
-            autoAck: true
+            autoAck: true               
             queueOpts:
             consumeOpts:
-              exclusive: false
+              exclusive: true           # Remove queue after disconnect
+            steps:
+              - Echo: \${$msg}          # Message in queue
+              - Echo: \${$content}      # ~ msg.content
+              - Echo: \${$contentData}  # ~ JSON.parse(msg.content)
 `
   }
   private conn: Connection
@@ -46,6 +52,7 @@ export class RMQRoutingKeyConsumer extends Tag {
       handler?: string
       consumeOpts?: Options.Consume
       autoAck?: boolean
+      steps?: any[]
     }[]
   }[]
 
@@ -84,13 +91,34 @@ export class RMQRoutingKeyConsumer extends Tag {
               }
             }
             const handle: (msg: any) => any = target.handler as any
+            const steps = target.steps
+            const self = this
             await this.channel.consume(q.queue, async (msg: ConsumeMessage) => {
               msg.content = msg.content?.toString() as any
               if (!this.slient) this.context.log(chalk.gray(this.icon) + ' ' + chalk.yellow(target.pretty ? JSON.stringify(msg, null, '  ') : JSON.stringify(msg)))
               if (target.autoAck) this.channel.ack(msg)
+              const rs = {
+                $msg: msg,
+                $content: msg.content,
+                $contentData: msg.content ? JSON.parse(msg.content.toString()) : undefined
+              }
               if (handle) {
-                await handle(msg)
-                if (!target.autoAck) this.channel.ack(msg)
+                await handle(rs)
+              } else if (steps) {
+                const gr: Group = new Components.Group()
+                gr.init({
+                  title: undefined,
+                  steps
+                })
+                await gr.setup(this.tc)
+                await gr.prepare({
+                  $$: self,
+                  $: gr,
+                  ...rs,
+                })
+                await gr.beforeExec()
+                await gr.exec()
+                await gr.dispose()
               }
             }, target.consumeOpts)
             this.context.groupEnd()
